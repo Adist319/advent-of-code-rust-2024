@@ -1,4 +1,5 @@
 advent_of_code::solution!(1);
+use std::collections::HashMap;
 
 pub fn part_one(input: &str) -> Option<u32> {
     // Parse input into two vectors of numbers
@@ -27,27 +28,21 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    // Parse input into two vectors of numbers
     let mut left_list = Vec::new();
-    let mut right_list = Vec::new();
+    let mut right_frequencies = HashMap::new();
     
+    // Parse and build frequency map simultaneously
     for line in input.lines() {
         if let Some((left, right)) = line.split_whitespace().collect::<Vec<_>>().split_first() {
             if let (Ok(left_num), Ok(right_num)) = (left.parse::<u32>(), right.last()?.parse::<u32>()) {
                 left_list.push(left_num);
-                right_list.push(right_num);
+                *right_frequencies.entry(right_num).or_insert(0) += 1;
             }
         }
     }
 
-    // Calculate similarity score
     let similarity_score: u32 = left_list.iter()
-        .map(|&num| {
-            // Count occurrences of this number in right list
-            let count = right_list.iter().filter(|&&x| x == num).count() as u32;
-            // Multiply number by its count
-            num * count
-        })
+        .map(|&num| num * right_frequencies.get(&num).unwrap_or(&0))
         .sum();
 
     Some(similarity_score)
